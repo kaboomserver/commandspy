@@ -1,0 +1,11 @@
+name: CommandSpy
+main: pw.kaboom.commandspy.Main
+description: Plugin that allows you to spy on players' commands.
+version: ${project.version}
+
+commands:
+   commandspy:
+      aliases: [c,cs,cspy]
+      description: Allows you to spy on players' commands
+      usage: /commandspy
+      permission: commandspy.command
