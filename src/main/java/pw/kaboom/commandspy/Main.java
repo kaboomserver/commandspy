@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 
 import org.bukkit.plugin.java.JavaPlugin;
@@ -26,10 +27,35 @@ public class Main extends JavaPlugin implements Listener {
 		Player commandRunner = event.getPlayer();
 		for (Player messageTarget: Bukkit.getOnlinePlayers()) {
 			if (getConfig().contains(messageTarget.getUniqueId().toString())) {
+				ChatColor color;
+
 				if (getConfig().contains(commandRunner.getUniqueId().toString())) {
-					messageTarget.sendMessage(ChatColor.YELLOW + "" + commandRunner.getName() + "" + ChatColor.YELLOW + ": " + event.getMessage());
+					color = ChatColor.GREEN;
 				} else {
-					messageTarget.sendMessage(ChatColor.AQUA + "" + commandRunner.getName() + "" + ChatColor.AQUA + ": " + event.getMessage());
+					color = ChatColor.RED;
+				}
+
+				messageTarget.sendMessage(color + "" + commandRunner.getName() + "" + color + ": " + event.getMessage());
+			}
+		}
+	}
+
+	@EventHandler
+	void onSignChange(SignChangeEvent event) {
+		Player signPlayer = event.getPlayer();
+		for (Player messageTarget: Bukkit.getOnlinePlayers()) {
+			if (getConfig().contains(messageTarget.getUniqueId().toString())) {
+				ChatColor color;
+
+				if (getConfig().contains(signPlayer.getUniqueId().toString())) {
+					color = ChatColor.GREEN;
+				} else {
+					color = ChatColor.RED;
+				}
+
+				messageTarget.sendMessage(color + "" + signPlayer.getName() + "" + color + " created a sign with contents:");
+				for (String line: event.getLines()) {
+					messageTarget.sendMessage(color + "  " + line);
 				}
 			}
 		}
