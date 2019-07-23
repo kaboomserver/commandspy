@@ -24,10 +24,11 @@ public class Main extends JavaPlugin implements Listener {
 
 	@EventHandler
 	void onCommand(PlayerCommandPreprocessEvent event) {
-		Player commandRunner = event.getPlayer();
+		final Player commandRunner = event.getPlayer();
+
 		for (Player messageTarget: Bukkit.getOnlinePlayers()) {
 			if (getConfig().contains(messageTarget.getUniqueId().toString())) {
-				ChatColor color;
+				final ChatColor color;
 
 				if (getConfig().contains(commandRunner.getUniqueId().toString())) {
 					color = ChatColor.GREEN;
@@ -42,18 +43,19 @@ public class Main extends JavaPlugin implements Listener {
 
 	@EventHandler
 	void onSignChange(SignChangeEvent event) {
-		Player signPlayer = event.getPlayer();
+		final Player signPlacer = event.getPlayer();
+
 		for (Player messageTarget: Bukkit.getOnlinePlayers()) {
 			if (getConfig().contains(messageTarget.getUniqueId().toString())) {
-				ChatColor color;
+				final ChatColor color;
 
-				if (getConfig().contains(signPlayer.getUniqueId().toString())) {
+				if (getConfig().contains(signPlacer.getUniqueId().toString())) {
 					color = ChatColor.GREEN;
 				} else {
 					color = ChatColor.RED;
 				}
 
-				messageTarget.sendMessage(color + "" + signPlayer.getName() + "" + color + " created a sign with contents:");
+				messageTarget.sendMessage(color + "" + signPlacer.getName() + "" + color + " created a sign with contents:");
 				for (String line: event.getLines()) {
 					messageTarget.sendMessage(color + "  " + line);
 				}
@@ -69,7 +71,8 @@ class CommandCommandSpy implements CommandExecutor {
 	}
 
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-		Player player = (Player)sender;
+		final Player player = (Player) sender;
+
 		if (main.getConfig().contains(player.getUniqueId().toString())) {
 			main.getConfig().set(player.getUniqueId().toString(), null);
 			main.saveConfig();
