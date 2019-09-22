@@ -6,6 +6,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 
 import org.bukkit.entity.Player;
 
@@ -71,16 +72,20 @@ class CommandCommandSpy implements CommandExecutor {
 	}
 
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-		final Player player = (Player) sender;
-
-		if (main.getConfig().contains(player.getUniqueId().toString())) {
-			main.getConfig().set(player.getUniqueId().toString(), null);
-			main.saveConfig();
-			player.sendMessage("Successfully disabled CommandSpy");
+		if (sender instanceof ConsoleCommandSender) {
+			sender.sendMessage("Command has to be run by a player");
 		} else {
-			main.getConfig().set(player.getUniqueId().toString(), true);
-			main.saveConfig();
-			player.sendMessage("Successfully enabled CommandSpy");
+			final Player player = (Player) sender;
+	
+			if (main.getConfig().contains(player.getUniqueId().toString())) {
+				main.getConfig().set(player.getUniqueId().toString(), null);
+				main.saveConfig();
+				player.sendMessage("Successfully disabled CommandSpy");
+			} else {
+				main.getConfig().set(player.getUniqueId().toString(), true);
+				main.saveConfig();
+				player.sendMessage("Successfully enabled CommandSpy");
+			}
 		}
 		return true;
 	}
