@@ -19,7 +19,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class Main extends JavaPlugin implements Listener {
 	public void onEnable() {
-		this.getCommand("commandspy").setExecutor(new CommandCommandSpy(this));
+		this.getCommand("commandspy").setExecutor(new CommandCommandSpy());
 		this.getServer().getPluginManager().registerEvents(this, this);
 	}
 
@@ -66,24 +66,20 @@ public class Main extends JavaPlugin implements Listener {
 }
 
 class CommandCommandSpy implements CommandExecutor {
-	Main main;
-	CommandCommandSpy(Main main) {
-		this.main = main;
-	}
-
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		if (sender instanceof ConsoleCommandSender) {
 			sender.sendMessage("Command has to be run by a player");
 		} else {
 			final Player player = (Player) sender;
+			final JavaPlugin plugin = JavaPlugin.getPlugin(Main.class);
 	
-			if (main.getConfig().contains(player.getUniqueId().toString())) {
-				main.getConfig().set(player.getUniqueId().toString(), null);
-				main.saveConfig();
+			if (plugin.getConfig().contains(player.getUniqueId().toString())) {
+				plugin.getConfig().set(player.getUniqueId().toString(), null);
+				plugin.saveConfig();
 				player.sendMessage("Successfully disabled CommandSpy");
 			} else {
-				main.getConfig().set(player.getUniqueId().toString(), true);
-				main.saveConfig();
+				plugin.getConfig().set(player.getUniqueId().toString(), true);
+				plugin.saveConfig();
 				player.sendMessage("Successfully enabled CommandSpy");
 			}
 		}
