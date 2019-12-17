@@ -20,7 +20,8 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
 		this.getServer().getPluginManager().registerEvents(this, this);
 	}
 
-	public boolean commandSpyCommand(final CommandSender sender, final Command cmd, final String label, final String[] args) {
+	@Override
+	public boolean onCommand(final CommandSender sender, final Command cmd, final String label, final String[] args) {
 		if (sender instanceof ConsoleCommandSender) {
 			sender.sendMessage("Command has to be run by a player");
 		} else {
@@ -41,7 +42,7 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
 	}
 
 	@EventHandler
-	void onCommand(final PlayerCommandPreprocessEvent event) {
+	void onPlayerCommandPreprocess(final PlayerCommandPreprocessEvent event) {
 		final Player commandRunner = event.getPlayer();
 
 		for (Player messageTarget: Bukkit.getOnlinePlayers()) {
