@@ -1,11 +1,14 @@
 package pw.kaboom.commandspy;
 
+import java.util.UUID;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -14,8 +17,11 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class Main extends JavaPlugin implements CommandExecutor, Listener {
+	private FileConfiguration config;
+
 	@Override
 	public void onEnable() {
+		config = getConfig();
 		this.getCommand("commandspy").setExecutor(this);
 		this.getServer().getPluginManager().registerEvents(this, this);
 	}
@@ -37,46 +43,49 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
 				plugin.saveConfig();
 				player.sendMessage("Successfully enabled CommandSpy");
 			}
+			config = plugin.getConfig();
 		}
 		return true;
 	}
 
 	@EventHandler
 	void onPlayerCommandPreprocess(final PlayerCommandPreprocessEvent event) {
-		final Player commandRunner = event.getPlayer();
+		for (String uuidString : config.getKeys(false)) {
+			UUID uuid = UUID.fromString(uuidString);
 
-		for (Player messageTarget: Bukkit.getOnlinePlayers()) {
-			if (getConfig().contains(messageTarget.getUniqueId().toString())) {
+			if (Bukkit.getPlayer(uuid) != null) {
+				final Player commandRunner = event.getPlayer();
 				final ChatColor color;
 
-				if (getConfig().contains(commandRunner.getUniqueId().toString())) {
+				if (config.contains(commandRunner.getUniqueId().toString())) {
 					color = ChatColor.GREEN;
 				} else {
 					color = ChatColor.RED;
 				}
 
-				messageTarget.sendMessage(color + "" + commandRunner.getName() + "" + color + ": " + event.getMessage());
+				Bukkit.getPlayer(uuid).sendMessage(color + "" + commandRunner.getName() + "" + color + ": " + event.getMessage());
 			}
 		}
 	}
 
 	@EventHandler
 	void onSignChange(final SignChangeEvent event) {
-		final Player signPlacer = event.getPlayer();
+		for (String uuidString : config.getKeys(false)) {
+			UUID uuid = UUID.fromString(uuidString);
 
-		for (Player messageTarget: Bukkit.getOnlinePlayers()) {
-			if (getConfig().contains(messageTarget.getUniqueId().toString())) {
+			if (Bukkit.getPlayer(uuid) != null) {
+				final Player signPlacer = event.getPlayer();
 				final ChatColor color;
 
-				if (getConfig().contains(signPlacer.getUniqueId().toString())) {
+				if (config.contains(signPlacer.getUniqueId().toString())) {
 					color = ChatColor.GREEN;
 				} else {
 					color = ChatColor.RED;
 				}
 
-				messageTarget.sendMessage(color + "" + signPlacer.getName() + "" + color + " created a sign with contents:");
+				Bukkit.getPlayer(uuid).sendMessage(color + "" + signPlacer.getName() + "" + color + " created a sign with contents:");
 				for (String line: event.getLines()) {
-					messageTarget.sendMessage(color + "  " + line);
+					Bukkit.getPlayer(uuid).sendMessage(color + "  " + line);
 				}
 			}
 		}
