@@ -56,9 +56,9 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
 
 			if (Bukkit.getPlayer(uuid) != null) {
 				Bukkit.getPlayer(uuid).sendMessage(
-						ChatColor.YELLOW + ""
+						ChatColor.AQUA + ""
 								+ event.getPlayer().getName() + ""
-								+ ChatColor.YELLOW + ": "
+								+ ChatColor.AQUA + ": "
 								+ event.getMessage()
 								);
 			}
@@ -72,13 +72,13 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
 
 			if (Bukkit.getPlayer(uuid) != null) {
 				Bukkit.getPlayer(uuid).sendMessage(
-						ChatColor.YELLOW + ""
+						ChatColor.AQUA + ""
 								+ event.getPlayer().getName() + ""
-								+ ChatColor.YELLOW
+								+ ChatColor.AQUA
 								+ " created a sign with contents:"
 								);
 				for (String line: event.getLines()) {
-					Bukkit.getPlayer(uuid).sendMessage(ChatColor.YELLOW + "  " + line);
+					Bukkit.getPlayer(uuid).sendMessage(ChatColor.AQUA + "  " + line);
 				}
 			}
 		}
