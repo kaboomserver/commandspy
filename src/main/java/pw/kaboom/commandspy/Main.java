@@ -49,16 +49,16 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
 		final Player player = (Player) sender;
 		final JavaPlugin plugin = JavaPlugin.getPlugin(Main.class);
 
-		if ("on".equalsIgnoreCase(args[0])) {
-			enableCommandSpy(player, plugin);
-		} else if ("off".equalsIgnoreCase(args[0])) {
-			disableCommandSpy(player, plugin);
-		} else {
+		if (args.length == 0) {
 			if (plugin.getConfig().contains(player.getUniqueId().toString())) {
 				enableCommandSpy(player, plugin);
 			} else {
 				disableCommandSpy(player, plugin);
 			}
+		} else if ("on".equalsIgnoreCase(args[0])) {
+			enableCommandSpy(player, plugin);
+		} else if ("off".equalsIgnoreCase(args[0])) {
+			disableCommandSpy(player, plugin);
 		}
 		config = plugin.getConfig();
 		return true;
