@@ -30,21 +30,22 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
 	public boolean onCommand(final CommandSender sender, final Command cmd, final String label, final String[] args) {
 		if (sender instanceof ConsoleCommandSender) {
 			sender.sendMessage("Command has to be run by a player");
-		} else {
-			final Player player = (Player) sender;
-			final JavaPlugin plugin = JavaPlugin.getPlugin(Main.class);
-
-			if (plugin.getConfig().contains(player.getUniqueId().toString())) {
-				plugin.getConfig().set(player.getUniqueId().toString(), null);
-				plugin.saveConfig();
-				player.sendMessage("Successfully disabled CommandSpy");
-			} else {
-				plugin.getConfig().set(player.getUniqueId().toString(), true);
-				plugin.saveConfig();
-				player.sendMessage("Successfully enabled CommandSpy");
-			}
-			config = plugin.getConfig();
+			return true;
 		}
+
+		final Player player = (Player) sender;
+		final JavaPlugin plugin = JavaPlugin.getPlugin(Main.class);
+
+		if (plugin.getConfig().contains(player.getUniqueId().toString())) {
+			plugin.getConfig().set(player.getUniqueId().toString(), null);
+			plugin.saveConfig();
+			player.sendMessage("Successfully disabled CommandSpy");
+		} else {
+			plugin.getConfig().set(player.getUniqueId().toString(), true);
+			plugin.saveConfig();
+			player.sendMessage("Successfully enabled CommandSpy");
+		}
+		config = plugin.getConfig();
 		return true;
 	}
 
@@ -54,16 +55,12 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
 			UUID uuid = UUID.fromString(uuidString);
 
 			if (Bukkit.getPlayer(uuid) != null) {
-				final Player commandRunner = event.getPlayer();
-				final ChatColor color;
-
-				if (config.contains(commandRunner.getUniqueId().toString())) {
-					color = ChatColor.GREEN;
-				} else {
-					color = ChatColor.RED;
-				}
-
-				Bukkit.getPlayer(uuid).sendMessage(color + "" + commandRunner.getName() + "" + color + ": " + event.getMessage());
+				Bukkit.getPlayer(uuid).sendMessage(
+						ChatColor.YELLOW + ""
+								+ event.getPlayer().getName() + ""
+								+ ChatColor.YELLOW + ": "
+								+ event.getMessage()
+								);
 			}
 		}
 	}
@@ -74,18 +71,14 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
 			UUID uuid = UUID.fromString(uuidString);
 
 			if (Bukkit.getPlayer(uuid) != null) {
-				final Player signPlacer = event.getPlayer();
-				final ChatColor color;
-
-				if (config.contains(signPlacer.getUniqueId().toString())) {
-					color = ChatColor.GREEN;
-				} else {
-					color = ChatColor.RED;
-				}
-
-				Bukkit.getPlayer(uuid).sendMessage(color + "" + signPlacer.getName() + "" + color + " created a sign with contents:");
+				Bukkit.getPlayer(uuid).sendMessage(
+						ChatColor.YELLOW + ""
+								+ event.getPlayer().getName() + ""
+								+ ChatColor.YELLOW
+								+ " created a sign with contents:"
+								);
 				for (String line: event.getLines()) {
-					Bukkit.getPlayer(uuid).sendMessage(color + "  " + line);
+					Bukkit.getPlayer(uuid).sendMessage(ChatColor.YELLOW + "  " + line);
 				}
 			}
 		}
