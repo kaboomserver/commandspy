@@ -50,10 +50,10 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
 		final JavaPlugin plugin = JavaPlugin.getPlugin(Main.class);
 
 		if (args.length == 0) {
-			if (plugin.getConfig().contains(player.getUniqueId().toString())) {
-				enableCommandSpy(player, plugin);
-			} else {
+			if (config.contains(player.getUniqueId().toString())) {
 				disableCommandSpy(player, plugin);
+			} else {
+				enableCommandSpy(player, plugin);
 			}
 		} else if ("on".equalsIgnoreCase(args[0])) {
 			enableCommandSpy(player, plugin);
