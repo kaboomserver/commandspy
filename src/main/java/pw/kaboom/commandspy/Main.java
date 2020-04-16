@@ -14,6 +14,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class Main extends JavaPlugin implements CommandExecutor, Listener {
@@ -26,6 +27,18 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
 		this.getServer().getPluginManager().registerEvents(this, this);
 	}
 
+	private void enableCommandSpy(final Player player, final Plugin plugin) {
+		plugin.getConfig().set(player.getUniqueId().toString(), null);
+		plugin.saveConfig();
+		player.sendMessage("Successfully disabled CommandSpy");
+	}
+
+	private void disableCommandSpy(final Player player, final Plugin plugin) {
+		plugin.getConfig().set(player.getUniqueId().toString(), true);
+		plugin.saveConfig();
+		player.sendMessage("Successfully enabled CommandSpy");
+	}
+
 	@Override
 	public boolean onCommand(final CommandSender sender, final Command cmd, final String label, final String[] args) {
 		if (sender instanceof ConsoleCommandSender) {
@@ -36,14 +49,16 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
 		final Player player = (Player) sender;
 		final JavaPlugin plugin = JavaPlugin.getPlugin(Main.class);
 
-		if (plugin.getConfig().contains(player.getUniqueId().toString())) {
-			plugin.getConfig().set(player.getUniqueId().toString(), null);
-			plugin.saveConfig();
-			player.sendMessage("Successfully disabled CommandSpy");
+		if ("on".equalsIgnoreCase(args[1])) {
+			enableCommandSpy(player, plugin);
+		} else if ("off".equalsIgnoreCase(args[1])) {
+			disableCommandSpy(player, plugin);
 		} else {
-			plugin.getConfig().set(player.getUniqueId().toString(), true);
-			plugin.saveConfig();
-			player.sendMessage("Successfully enabled CommandSpy");
+			if (plugin.getConfig().contains(player.getUniqueId().toString())) {
+				enableCommandSpy(player, plugin);
+			} else {
+				disableCommandSpy(player, plugin);
+			}
 		}
 		config = plugin.getConfig();
 		return true;
