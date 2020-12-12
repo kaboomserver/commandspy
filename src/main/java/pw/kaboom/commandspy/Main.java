@@ -73,7 +73,7 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
 		for (String uuidString : config.getKeys(false)) {
 			UUID uuid = UUID.fromString(uuidString);
 
-			if (Bukkit.getPlayer(uuid) != null && !event.isCancelled()) {
+			if (Bukkit.getPlayer(uuid) != null) {
 				Bukkit.getPlayer(uuid).sendMessage(
 						ChatColor.AQUA + ""
 								+ event.getPlayer().getName() + ""
