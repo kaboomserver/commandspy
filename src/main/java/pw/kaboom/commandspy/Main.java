@@ -66,6 +66,10 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
 
 	@EventHandler
 	void onPlayerCommandPreprocess(final PlayerCommandPreprocessEvent event) {
+		if (event.isCancelled()) {
+			return;
+		}
+
 		for (String uuidString : config.getKeys(false)) {
 			UUID uuid = UUID.fromString(uuidString);
 
