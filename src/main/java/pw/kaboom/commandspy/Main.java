@@ -30,13 +30,13 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
 	private void enableCommandSpy(final Player player, final Plugin plugin) {
 		plugin.getConfig().set(player.getUniqueId().toString(), true);
 		plugin.saveConfig();
-		player.sendMessage("Successfully enabled CommandSpy");
+		player.sendMessage(ChatColor.DARK_GRAY + "" + ChatColor.BOLD + "[" + ChatColor.GRAY + "CSPY" + ChatColor.DARK_GRAY + "" + ChatColor.BOLD + "]" + ChatColor.RESET + "Successfully enabled CommandSpy");
 	}
 
 	private void disableCommandSpy(final Player player, final Plugin plugin) {
 		plugin.getConfig().set(player.getUniqueId().toString(), null);
 		plugin.saveConfig();
-		player.sendMessage("Successfully disabled CommandSpy");
+		player.sendMessage(ChatColor.DARK_GRAY + "" + ChatColor.BOLD + "[" + ChatColor.GRAY + "CSPY" + ChatColor.DARK_GRAY + "" + ChatColor.BOLD + "]" + ChatColor.RESET + "Successfully disabled CommandSpy");
 	}
 
 	@Override
@@ -75,7 +75,7 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
 
 			if (Bukkit.getPlayer(uuid) != null) {
 				Bukkit.getPlayer(uuid).sendMessage(
-						ChatColor.AQUA + ""
+						ChatColor.DARK_GRAY + "" + ChatColor.BOLD + "[" + ChatColor.GRAY + "CSPY" + ChatColor.DARK_GRAY + "" + ChatColor.BOLD + "]" + ChatColor.AQUA + ""
 								+ event.getPlayer().getName() + ""
 								+ ChatColor.AQUA + ": "
 								+ event.getMessage()
@@ -91,7 +91,7 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
 
 			if (Bukkit.getPlayer(uuid) != null) {
 				Bukkit.getPlayer(uuid).sendMessage(
-						ChatColor.AQUA + ""
+						ChatColor.DARK_GRAY + "" + ChatColor.BOLD + "[" + ChatColor.GRAY + "CSPY" + ChatColor.DARK_GRAY + "" + ChatColor.BOLD + "]" + ChatColor.AQUA + ""
 								+ event.getPlayer().getName() + ""
 								+ ChatColor.AQUA
 								+ " created a sign with contents:"
