@@ -29,5 +29,5 @@ jobs:
 
     - uses: actions/upload-artifact@v1
       with:
-        name: iControlU
-        path: target/iControlU.jar
+        name: CommandSpy
+        path: target/CommandSpy.jar
