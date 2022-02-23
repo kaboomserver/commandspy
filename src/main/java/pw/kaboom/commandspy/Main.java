@@ -15,6 +15,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -38,6 +39,27 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
 		plugin.getConfig().set(player.getUniqueId().toString(), null);
 		plugin.saveConfig();
 		player.sendMessage("Successfully disabled CommandSpy");
+	}
+
+	private boolean commandSpyEnabled(final Player player) {
+		final Set<String> uuids = config.getKeys(false);
+		if (uuids.contains(player.getUniqueId().toString())) {
+			return true;
+		}
+		return false;
+	}
+
+	private boolean canUseCommandSpy(final Player player, final Plugin plugin) {
+		if (player.hasPermission("commandspy")) {
+			return true;
+		}
+		if (commandSpyEnabled(player)) {
+			plugin.getConfig().set(player.getUniqueId().toString(), null);
+			plugin.saveConfig();
+			player.sendMessage("CommandSpy has automatically been disabled as you have lost the permission");
+		}
+
+		return false;
 	}
 
 	@Override
@@ -71,32 +93,38 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
 			return;
 		}
 
-		Set<String> uuids = config.getKeys(false);
-		ChatColor color = (uuids.contains(event.getPlayer().getUniqueId().toString())) ? ChatColor.YELLOW : ChatColor.AQUA;
+		final Plugin plugin = JavaPlugin.getPlugin(Main.class);
+		final Player player = event.getPlayer();
+		final ChatColor color = (commandSpyEnabled(player) && canUseCommandSpy(player, plugin)) ? ChatColor.YELLOW : ChatColor.AQUA;
 
-		for (String uuidString : uuids) {
-			UUID uuid = UUID.fromString(uuidString);
+		for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+			final String uuidString = onlinePlayer.getUniqueId().toString();
+			if (canUseCommandSpy(onlinePlayer, plugin) && commandSpyEnabled(onlinePlayer)) {
+				UUID uuid = UUID.fromString(uuidString);
 
-			if (Bukkit.getPlayer(uuid) != null) {
-				Bukkit.getPlayer(uuid).sendMessage(
-						color + ""
-								+ event.getPlayer().getName() + ""
-								+ color + ": "
-								+ event.getMessage()
-								);
+				if (Bukkit.getPlayer(uuid) != null) {
+					Bukkit.getPlayer(uuid).sendMessage(
+							color + ""
+									+ event.getPlayer().getName() + ""
+									+ color + ": "
+									+ event.getMessage()
+					);
+				}
 			}
 		}
 	}
 
 	@EventHandler
 	void onSignChange(final SignChangeEvent event) {
-		Set<String> uuids = config.getKeys(false);
-		ChatColor color = (uuids.contains(event.getPlayer().getUniqueId().toString())) ? ChatColor.YELLOW : ChatColor.AQUA;
+		final Plugin plugin = JavaPlugin.getPlugin(Main.class);
+		final Player player = event.getPlayer();
+		final ChatColor color = (commandSpyEnabled(player) && canUseCommandSpy(player, plugin)) ? ChatColor.YELLOW : ChatColor.AQUA;
 
-		for (String uuidString : uuids) {
-			UUID uuid = UUID.fromString(uuidString);
+		for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+			final String uuidString = onlinePlayer.getUniqueId().toString();
+			if (canUseCommandSpy(onlinePlayer, plugin) && commandSpyEnabled(onlinePlayer)) {
+				UUID uuid = UUID.fromString(uuidString);
 
-			if (Bukkit.getPlayer(uuid) != null) {
 				Bukkit.getPlayer(uuid).sendMessage(
 						color + ""
 								+ event.getPlayer().getName() + ""
