@@ -1,5 +1,6 @@
 package pw.kaboom.commandspy;
 
+import java.util.Set;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -70,14 +71,17 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
 			return;
 		}
 
-		for (String uuidString : config.getKeys(false)) {
+		Set<String> uuids = config.getKeys(false);
+		ChatColor color = (uuids.contains(event.getPlayer().getUniqueId().toString())) ? ChatColor.YELLOW : ChatColor.AQUA;
+
+		for (String uuidString : uuids) {
 			UUID uuid = UUID.fromString(uuidString);
 
 			if (Bukkit.getPlayer(uuid) != null) {
 				Bukkit.getPlayer(uuid).sendMessage(
-						ChatColor.AQUA + ""
+						color + ""
 								+ event.getPlayer().getName() + ""
-								+ ChatColor.AQUA + ": "
+								+ color + ": "
 								+ event.getMessage()
 								);
 			}
@@ -86,18 +90,21 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
 
 	@EventHandler
 	void onSignChange(final SignChangeEvent event) {
-		for (String uuidString : config.getKeys(false)) {
+		Set<String> uuids = config.getKeys(false);
+		ChatColor color = (uuids.contains(event.getPlayer().getUniqueId().toString())) ? ChatColor.YELLOW : ChatColor.AQUA;
+
+		for (String uuidString : uuids) {
 			UUID uuid = UUID.fromString(uuidString);
 
 			if (Bukkit.getPlayer(uuid) != null) {
 				Bukkit.getPlayer(uuid).sendMessage(
-						ChatColor.AQUA + ""
+						color + ""
 								+ event.getPlayer().getName() + ""
-								+ ChatColor.AQUA
+								+ color
 								+ " created a sign with contents:"
 								);
 				for (String line: event.getLines()) {
-					Bukkit.getPlayer(uuid).sendMessage(ChatColor.AQUA + "  " + line);
+					Bukkit.getPlayer(uuid).sendMessage(color + "  " + line);
 				}
 			}
 		}
