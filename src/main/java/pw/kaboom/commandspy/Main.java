@@ -28,15 +28,15 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
         this.getServer().getPluginManager().registerEvents(this, this);
     }
 
-    private void enableCommandSpy(final Player player, final Plugin plugin) {
-        plugin.getConfig().set(player.getUniqueId().toString(), true);
-        plugin.saveConfig();
+    private void enableCommandSpy(final Player player) {
+        config.set(player.getUniqueId().toString(), true);
+        saveConfig();
         player.sendMessage("Successfully enabled CommandSpy");
     }
 
-    private void disableCommandSpy(final Player player, final Plugin plugin) {
-        plugin.getConfig().set(player.getUniqueId().toString(), null);
-        plugin.saveConfig();
+    private void disableCommandSpy(final Player player) {
+        config.set(player.getUniqueId().toString(), null);
+        saveConfig();
         player.sendMessage("Successfully disabled CommandSpy");
     }
 
@@ -49,20 +49,18 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
         }
 
         final Player player = (Player) sender;
-        final JavaPlugin plugin = JavaPlugin.getPlugin(Main.class);
 
         if (args.length == 0) {
             if (config.contains(player.getUniqueId().toString())) {
-                disableCommandSpy(player, plugin);
+                disableCommandSpy(player);
             } else {
-                enableCommandSpy(player, plugin);
+                enableCommandSpy(player);
             }
         } else if ("on".equalsIgnoreCase(args[0])) {
-            enableCommandSpy(player, plugin);
+            enableCommandSpy(player);
         } else if ("off".equalsIgnoreCase(args[0])) {
-            disableCommandSpy(player, plugin);
+            disableCommandSpy(player);
         }
-        config = plugin.getConfig();
         return true;
     }
 
