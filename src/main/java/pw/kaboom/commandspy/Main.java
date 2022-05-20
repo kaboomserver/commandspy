@@ -41,7 +41,8 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
     }
 
     @Override
-    public boolean onCommand(final CommandSender sender, final Command cmd, final String label, final String[] args) {
+    public boolean onCommand(final CommandSender sender, final Command cmd, final String label,
+                             final String[] args) {
         if (sender instanceof ConsoleCommandSender) {
             sender.sendMessage("Command has to be run by a player");
             return true;
@@ -72,7 +73,8 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
         }
 
         Set<String> uuids = config.getKeys(false);
-        ChatColor color = (uuids.contains(event.getPlayer().getUniqueId().toString())) ? ChatColor.YELLOW : ChatColor.AQUA;
+        ChatColor color = (uuids.contains(event.getPlayer().getUniqueId().toString()))
+            ? ChatColor.YELLOW : ChatColor.AQUA;
 
         for (String uuidString : uuids) {
             UUID uuid = UUID.fromString(uuidString);
@@ -91,7 +93,8 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
     @EventHandler
     void onSignChange(final SignChangeEvent event) {
         Set<String> uuids = config.getKeys(false);
-        ChatColor color = (uuids.contains(event.getPlayer().getUniqueId().toString())) ? ChatColor.YELLOW : ChatColor.AQUA;
+        ChatColor color = (uuids.contains(event.getPlayer().getUniqueId().toString()))
+            ? ChatColor.YELLOW : ChatColor.AQUA;
 
         for (String uuidString : uuids) {
             UUID uuid = UUID.fromString(uuidString);
