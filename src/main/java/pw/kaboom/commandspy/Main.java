@@ -40,6 +40,13 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
         player.sendMessage("Successfully disabled CommandSpy");
     }
 
+    private ChatColor getChatColor(final Player player) {
+        if (config.contains(player.getUniqueId().toString())) {
+            return ChatColor.YELLOW;
+        }
+        return ChatColor.AQUA;
+    }
+
     @Override
     public boolean onCommand(final CommandSender sender, final Command cmd, final String label,
                              final String[] args) {
@@ -50,17 +57,16 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
 
         final Player player = (Player) sender;
 
-        if (args.length == 0) {
-            if (config.contains(player.getUniqueId().toString())) {
-                disableCommandSpy(player);
-            } else {
-                enableCommandSpy(player);
-            }
-        } else if ("on".equalsIgnoreCase(args[0])) {
+        if (args.length >= 1 && "on".equalsIgnoreCase(args[0])) {
             enableCommandSpy(player);
-        } else if ("off".equalsIgnoreCase(args[0])) {
-            disableCommandSpy(player);
+            return true;
         }
+        if ((args.length >= 1 && "off".equalsIgnoreCase(args[0]))
+                || config.contains(player.getUniqueId().toString())) {
+            disableCommandSpy(player);
+            return true;
+        }
+        enableCommandSpy(player);
         return true;
     }
 
@@ -70,43 +76,39 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
             return;
         }
 
-        Set<String> uuids = config.getKeys(false);
-        ChatColor color = (uuids.contains(event.getPlayer().getUniqueId().toString()))
-            ? ChatColor.YELLOW : ChatColor.AQUA;
+        final Player player = event.getPlayer();
+        final ChatColor color = getChatColor(player);
+        final String message = color + player.getName() + color + ": " + event.getMessage();
 
-        for (String uuidString : uuids) {
-            UUID uuid = UUID.fromString(uuidString);
+        for (String uuidString : config.getKeys(false)) {
+            final UUID uuid = UUID.fromString(uuidString);
+            final Player recipient = Bukkit.getPlayer(uuid);
 
-            if (Bukkit.getPlayer(uuid) != null) {
-                Bukkit.getPlayer(uuid).sendMessage(
-                        color + ""
-                                + event.getPlayer().getName() + ""
-                                + color + ": "
-                                + event.getMessage()
-                                );
+            if (recipient == null) {
+                continue;
             }
+            recipient.sendMessage(message);
         }
     }
 
     @EventHandler
     void onSignChange(final SignChangeEvent event) {
-        Set<String> uuids = config.getKeys(false);
-        ChatColor color = (uuids.contains(event.getPlayer().getUniqueId().toString()))
-            ? ChatColor.YELLOW : ChatColor.AQUA;
+        final Player player = event.getPlayer();
+        final ChatColor color = getChatColor(player);
+        final String message = color + player.getName() + color
+            + " created a sign with contents:";
 
-        for (String uuidString : uuids) {
-            UUID uuid = UUID.fromString(uuidString);
+        for (String uuidString : config.getKeys(false)) {
+            final UUID uuid = UUID.fromString(uuidString);
+            final Player recipient = Bukkit.getPlayer(uuid);
 
-            if (Bukkit.getPlayer(uuid) != null) {
-                Bukkit.getPlayer(uuid).sendMessage(
-                        color + ""
-                                + event.getPlayer().getName() + ""
-                                + color
-                                + " created a sign with contents:"
-                                );
-                for (String line: event.getLines()) {
-                    Bukkit.getPlayer(uuid).sendMessage(color + "  " + line);
-                }
+            if (recipient == null) {
+                continue;
+            }
+            recipient.sendMessage(message);
+
+            for (String line : event.getLines()) {
+                recipient.sendMessage(color + "  " + line);
             }
         }
     }
