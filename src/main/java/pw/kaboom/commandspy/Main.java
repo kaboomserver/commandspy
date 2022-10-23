@@ -4,7 +4,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -17,6 +16,8 @@ import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 public final class Main extends JavaPlugin implements CommandExecutor, Listener {
     private FileConfiguration config;
@@ -31,27 +32,27 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
     private void enableCommandSpy(final Player player) {
         config.set(player.getUniqueId().toString(), true);
         saveConfig();
-        player.sendMessage("Successfully enabled CommandSpy");
+        player.sendMessage(Component.text("Successfully enabled CommandSpy"));
     }
 
     private void disableCommandSpy(final Player player) {
         config.set(player.getUniqueId().toString(), null);
         saveConfig();
-        player.sendMessage("Successfully disabled CommandSpy");
+        player.sendMessage(Component.text("Successfully disabled CommandSpy"));
     }
 
-    private ChatColor getChatColor(final Player player) {
+    private NamedTextColor getTextColor(final Player player) {
         if (config.contains(player.getUniqueId().toString())) {
-            return ChatColor.YELLOW;
+            return NamedTextColor.YELLOW;
         }
-        return ChatColor.AQUA;
+        return NamedTextColor.AQUA;
     }
 
     @Override
     public boolean onCommand(final CommandSender sender, final Command cmd, final String label,
                              final String[] args) {
         if (sender instanceof ConsoleCommandSender) {
-            sender.sendMessage("Command has to be run by a player");
+            sender.sendMessage(Component.text("Command has to be run by a player"));
             return true;
         }
 
@@ -77,8 +78,10 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
         }
 
         final Player player = event.getPlayer();
-        final ChatColor color = getChatColor(player);
-        final String message = color + player.getName() + color + ": " + event.getMessage();
+        final NamedTextColor color = getTextColor(player);
+        final Component message = Component.text(player.getName(), color)
+            .append(Component.text(": "))
+            .append(Component.text(event.getMessage()));
 
         for (String uuidString : config.getKeys(false)) {
             final UUID uuid = UUID.fromString(uuidString);
@@ -94,9 +97,15 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
     @EventHandler
     void onSignChange(final SignChangeEvent event) {
         final Player player = event.getPlayer();
-        final ChatColor color = getChatColor(player);
-        final String message = color + player.getName() + color
-            + " created a sign with contents:";
+        final NamedTextColor color = getTextColor(player);
+        Component message = Component.text(player.getName(), color)
+            .append(Component.text(" created a sign with contents:"));
+
+        for (Component line : event.lines()) {
+            message = message
+                .append(Component.text("\n "))
+                .append(line);
+        }
 
         for (String uuidString : config.getKeys(false)) {
             final UUID uuid = UUID.fromString(uuidString);
@@ -106,10 +115,6 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
                 continue;
             }
             recipient.sendMessage(message);
-
-            for (String line : event.getLines()) {
-                recipient.sendMessage(color + "  " + line);
-            }
         }
     }
 }
