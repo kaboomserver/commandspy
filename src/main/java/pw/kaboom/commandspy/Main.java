@@ -1,12 +1,11 @@
 package pw.kaboom.commandspy;
 
-import java.util.UUID;
+import java.io.File;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -19,29 +18,36 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.NotNull;
 
 public final class Main extends JavaPlugin implements CommandExecutor, Listener {
-    private FileConfiguration config;
+    private CommandSpyState config;
 
     @Override
     public void onEnable() {
-        config = getConfig();
+        this.config = new CommandSpyState(new File(this.getDataFolder(), "state.bin"));
+
         this.getCommand("commandspy").setExecutor(this);
         this.getServer().getPluginManager().registerEvents(this, this);
+
+        // Save the config every 30 seconds
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, this.config::trySave, 600L, 600L);
+    }
+
+    @Override
+    public void onDisable() {
+        this.config.trySave();
     }
 
     private void enableCommandSpy(final Player player) {
-        config.set(player.getUniqueId().toString(), true);
-        saveConfig();
+        this.config.setCommandSpyState(player.getUniqueId(), true);
         player.sendMessage(Component.text("Successfully enabled CommandSpy"));
     }
 
     private void disableCommandSpy(final Player player) {
-        config.set(player.getUniqueId().toString(), null);
-        saveConfig();
+        this.config.setCommandSpyState(player.getUniqueId(), false);
         player.sendMessage(Component.text("Successfully disabled CommandSpy"));
     }
 
     private NamedTextColor getTextColor(final Player player) {
-        if (config.contains(player.getUniqueId().toString())) {
+        if (this.config.getCommandSpyState(player.getUniqueId())) {
             return NamedTextColor.YELLOW;
         }
 
@@ -61,7 +67,7 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
             return true;
         }
         if ((args.length >= 1 && "off".equalsIgnoreCase(args[0]))
-                || config.contains(player.getUniqueId().toString())) {
+                || this.config.getCommandSpyState(player.getUniqueId())) {
             disableCommandSpy(player);
             return true;
         }
@@ -73,20 +79,12 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
     void onPlayerCommandPreprocess(final PlayerCommandPreprocessEvent event) {
         final Player player = event.getPlayer();
         final NamedTextColor color = getTextColor(player);
+
         final Component message = Component.text(player.getName(), color)
             .append(Component.text(": "))
             .append(Component.text(event.getMessage()));
 
-        for (final String uuidString : config.getKeys(false)) {
-            final UUID uuid = UUID.fromString(uuidString);
-            final Player recipient = Bukkit.getPlayer(uuid);
-
-            if (recipient == null) {
-                continue;
-            }
-
-            recipient.sendMessage(message);
-        }
+        this.config.broadcastSpyMessage(message);
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
@@ -102,14 +100,6 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
                 .append(line);
         }
 
-        for (final String uuidString : config.getKeys(false)) {
-            final UUID uuid = UUID.fromString(uuidString);
-            final Player recipient = Bukkit.getPlayer(uuid);
-
-            if (recipient == null) {
-                continue;
-            }
-            recipient.sendMessage(message);
-        }
+        this.config.broadcastSpyMessage(message);
     }
 }
