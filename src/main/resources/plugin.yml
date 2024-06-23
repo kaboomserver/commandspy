@@ -10,3 +10,4 @@ commands:
       aliases: [ c, cs, cspy ]
       description: Allows you to spy on players' commands
       permission: commandspy.command
+      usage: 'Usage: /<command> [player] [on|enable|off|disable]'
