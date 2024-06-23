@@ -1,6 +1,5 @@
 package pw.kaboom.commandspy;
 
-import java.util.Set;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -11,10 +10,10 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -71,12 +70,8 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
         return true;
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     void onPlayerCommandPreprocess(final PlayerCommandPreprocessEvent event) {
-        if (event.isCancelled()) {
-            return;
-        }
-
         final Player player = event.getPlayer();
         final NamedTextColor color = getTextColor(player);
         final Component message = Component.text(player.getName(), color)
