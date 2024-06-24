@@ -25,6 +25,7 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
     public void onEnable() {
         this.config = new CommandSpyState(new File(this.getDataFolder(), "state.bin"));
 
+        //noinspection DataFlowIssue
         this.getCommand("commandspy").setExecutor(this);
         this.getServer().getPluginManager().registerEvents(this, this);
 

@@ -1,7 +1,7 @@
 name: CommandSpy
 main: pw.kaboom.commandspy.Main
 description: Plugin that allows you to spy on players' commands.
-api-version: '1.19'
+api-version: '1.20'
 version: master
 folia-supported: true
 
