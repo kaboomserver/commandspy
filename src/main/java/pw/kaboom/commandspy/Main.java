@@ -82,7 +82,10 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
                 if (state != null && args.length == 1) {
                     break;
                 } else if (state == null && args.length == 2) {
-                    return false;
+                    sender.sendMessage(Component.text("Usage: ", NamedTextColor.RED)
+                            .append(Component.text(cmd.getUsage().replace("<command>", label)))
+                    );
+                    return true;
                 }
 
                 // Get the first argument as a player. Fail if it can't be found.
@@ -99,7 +102,10 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
                 return true;
             }
             default -> {
-                return false;
+                sender.sendMessage(Component.text("Usage: ", NamedTextColor.RED)
+                        .append(Component.text(cmd.getUsage().replace("<command>", label)))
+                );
+                return true;
             }
         }
 
