@@ -33,7 +33,8 @@ public final class CommandSpyState {
         } catch (final FileNotFoundException exception) {
             try {
                 this.save(); // Create file if it doesn't exist
-            } catch (IOException ignored) {}
+            } catch (IOException ignored) {
+            }
         } catch (final IOException exception) {
             LOGGER.error("Failed to load state file:", exception);
         }
@@ -47,7 +48,7 @@ public final class CommandSpyState {
 
         // Loop until we read less than 16 bytes
         while ((read = reader.readNBytes(buffer.array(), 0, 16)) == 16) {
-             this.users.add(new UUID(buffer.getLong(0), buffer.getLong(8)));
+            this.users.add(new UUID(buffer.getLong(0), buffer.getLong(8)));
         }
 
         reader.close();
@@ -62,7 +63,7 @@ public final class CommandSpyState {
         final ByteBuffer buffer = ByteBuffer.wrap(new byte[16]);
 
         final long stamp = this.usersLock.readLock();
-        for (final UUID uuid: this.users) {
+        for (final UUID uuid : this.users) {
             buffer.putLong(0, uuid.getMostSignificantBits());
             buffer.putLong(8, uuid.getLeastSignificantBits());
             writer.write(buffer.array());

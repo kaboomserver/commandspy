@@ -1,8 +1,7 @@
 package pw.kaboom.commandspy;
 
-import java.io.File;
-import java.util.UUID;
-
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -14,9 +13,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.plugin.java.JavaPlugin;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.NotNull;
+
+import java.io.File;
+import java.util.UUID;
 
 public final class Main extends JavaPlugin implements CommandExecutor, Listener {
     private CommandSpyState config;
@@ -47,7 +47,7 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
         target.sendMessage(Component.empty()
                 .append(Component.text("Successfully "))
                 .append(stateString)
-                .append(Component.text(" CommandSpy.")));
+                .append(Component.text(" CommandSpy")));
 
         if (source != target) {
             source.sendMessage(Component.empty()
@@ -55,7 +55,6 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
                     .append(stateString)
                     .append(Component.text(" CommandSpy for "))
                     .append(target.name())
-                    .append(Component.text("."))
             );
         }
     }
@@ -76,7 +75,8 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
         Boolean state = null;
 
         switch (args.length) {
-            case 0 -> {}
+            case 0 -> {
+            }
             case 1, 2 -> {
                 // Get the last argument as a state. Fail if we have 2 arguments.
                 state = getState(args[args.length - 1]);
