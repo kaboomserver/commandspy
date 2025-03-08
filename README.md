@@ -6,9 +6,9 @@ The plugin is created for the Kaboom server.
 
 ## Commands
 
-| Command | Alias | Permission | Description |
-| ------- | ----- | ---------- | ----------- |
-|/commandspy | /c, /cs, /cspy | commandspy.command | Allows you to spy on players' commands|
+| Command     | Alias          | Permission         | Description                            |
+|-------------|----------------|--------------------|----------------------------------------|
+| /commandspy | /c, /cs, /cspy | commandspy.command | Allows you to spy on players' commands |
 
 ## Compiling
 

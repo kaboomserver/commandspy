@@ -1,13 +1,13 @@
 name: CommandSpy
 main: pw.kaboom.commandspy.Main
 description: Plugin that allows you to spy on players' commands.
-api-version: 1.13
+api-version: '1.20'
 version: master
 folia-supported: true
 
 commands:
    commandspy:
-      aliases: [c,cs,cspy]
+      aliases: [ c, cs, cspy ]
       description: Allows you to spy on players' commands
-      usage: /commandspy
       permission: commandspy.command
+      usage: '/<command> [player] [on|enable|off|disable]'
