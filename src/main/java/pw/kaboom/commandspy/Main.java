@@ -1,10 +1,16 @@
 package pw.kaboom.commandspy;
 
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.brigadier.tree.LiteralCommandNode;
+import io.papermc.paper.command.brigadier.CommandSourceStack;
+import io.papermc.paper.command.brigadier.Commands;
+import io.papermc.paper.command.brigadier.MessageComponentSerializer;
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -14,19 +20,30 @@ import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
+import pw.kaboom.commandspy.command.PlayerOrUUIDArgumentType;
+import pw.kaboom.commandspy.command.StateArgumentType;
 
 import java.io.File;
-import java.util.UUID;
+import java.util.List;
 
-public final class Main extends JavaPlugin implements CommandExecutor, Listener {
+import static io.papermc.paper.command.brigadier.Commands.*;
+import static pw.kaboom.commandspy.command.PlayerOrUUIDArgumentType.getPlayer;
+import static pw.kaboom.commandspy.command.StateArgumentType.getState;
+
+public final class Main extends JavaPlugin implements Listener {
+    public static final SimpleCommandExceptionType ERROR_NOT_PLAYER =
+        new SimpleCommandExceptionType(MessageComponentSerializer.message()
+            .serialize(Component.translatable("permissions.requires.player")));
+
     private CommandSpyState config;
 
     @Override
     public void onEnable() {
         this.config = new CommandSpyState(new File(this.getDataFolder(), "state.bin"));
 
-        //noinspection DataFlowIssue
-        this.getCommand("commandspy").setExecutor(this);
+
+        this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS,
+            event -> this.registerCommands(event.registrar()));
         this.getServer().getPluginManager().registerEvents(this, this);
 
         // Save the state every 30 seconds
@@ -38,12 +55,40 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
         this.config.trySave();
     }
 
-    private void updateCommandSpyState(final @NotNull Player target,
-                                       final @NotNull CommandSender source, final boolean state) {
+    private void registerCommands(final Commands registrar) {
+        final LiteralCommandNode<CommandSourceStack> commandSpyCommand =
+            literal("commandspy")
+                .requires(Commands.restricted(ctx -> ctx.getSender()
+                    .hasPermission("commandspy.command")))
+                .then(argument("state", new StateArgumentType())
+                    .executes(ctx -> updateState(ctx.getSource().getSender(),
+                        null, getState(ctx, "state"))))
+                .then(argument("target", new PlayerOrUUIDArgumentType())
+                    .then(argument("state", new StateArgumentType())
+                        .executes(ctx -> updateState(ctx.getSource().getSender(),
+                            getPlayer(ctx, "target"), getState(ctx, "state"))))
+                    .executes(ctx -> updateState(ctx.getSource().getSender(),
+                        getPlayer(ctx, "target"), null)))
+                .executes(ctx -> updateState(ctx.getSource().getSender(),
+                    null, null))
+                .build();
+
+        registrar.register(commandSpyCommand,
+            "Allows you to spy on players' commands", List.of("c", "cs", "cspy"));
+    }
+
+    private int updateState(final @NotNull CommandSender source,
+                            Player target, Boolean state) throws CommandSyntaxException {
+        if (target == null) {
+            if (!(source instanceof final Player player)) throw ERROR_NOT_PLAYER.create();
+            target = player;
+        }
+
+        if (state == null) state = !this.config.getCommandSpyState(target.getUniqueId());
+
         this.config.setCommandSpyState(target.getUniqueId(), state);
 
         final Component stateString = Component.text(state ? "enabled" : "disabled");
-
         target.sendMessage(Component.empty()
                 .append(Component.text("Successfully "))
                 .append(stateString)
@@ -54,9 +99,10 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
                     .append(Component.text("Successfully "))
                     .append(stateString)
                     .append(Component.text(" CommandSpy for "))
-                    .append(target.name())
-            );
+                    .append(target.name()));
         }
+
+        return Command.SINGLE_SUCCESS;
     }
 
     private NamedTextColor getTextColor(final Player player) {
@@ -65,67 +111,6 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
         }
 
         return NamedTextColor.AQUA;
-    }
-
-    @Override
-    public boolean onCommand(final @NotNull CommandSender sender, final @NotNull Command cmd,
-                             final @NotNull String label, final String[] args) {
-
-        Player target = null;
-        Boolean state = null;
-
-        switch (args.length) {
-            case 0 -> {
-            }
-            case 1, 2 -> {
-                // Get the last argument as a state. Fail if we have 2 arguments.
-                state = getState(args[args.length - 1]);
-                if (state != null && args.length == 1) {
-                    break;
-                } else if (state == null && args.length == 2) {
-                    sender.sendMessage(Component.text("Usage: ", NamedTextColor.RED)
-                            .append(Component.text(cmd.getUsage().replace("<command>", label)))
-                    );
-                    return true;
-                }
-
-                // Get the first argument as a player. Fail if it can't be found.
-                target = getPlayer(args[0]);
-                if (target != null) {
-                    break;
-                }
-
-                sender.sendMessage(Component.empty()
-                        .append(Component.text("Player \""))
-                        .append(Component.text(args[0]))
-                        .append(Component.text("\" not found"))
-                );
-                return true;
-            }
-            default -> {
-                sender.sendMessage(Component.text("Usage: ", NamedTextColor.RED)
-                        .append(Component.text(cmd.getUsage().replace("<command>", label)))
-                );
-                return true;
-            }
-        }
-
-        if (target == null) {
-            if (!(sender instanceof final Player player)) {
-                sender.sendMessage(Component.text("Command has to be run by a player"));
-                return true;
-            }
-
-            target = player;
-        }
-
-        if (state == null) {
-            state = !this.config.getCommandSpyState(target.getUniqueId());
-        }
-
-        this.updateCommandSpyState(target, sender, state);
-
-        return true;
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
@@ -154,35 +139,5 @@ public final class Main extends JavaPlugin implements CommandExecutor, Listener 
         }
 
         this.config.broadcastSpyMessage(message);
-    }
-
-    private static Player getPlayer(final String arg) {
-        final Player player = Bukkit.getPlayer(arg);
-        if (player != null) {
-            return player;
-        }
-
-        final UUID uuid;
-        try {
-            uuid = UUID.fromString(arg);
-        } catch (final IllegalArgumentException ignored) {
-            return null;
-        }
-
-        return Bukkit.getPlayer(uuid);
-    }
-
-    private static Boolean getState(final String arg) {
-        switch (arg) {
-            case "on", "enable" -> {
-                return true;
-            }
-            case "off", "disable" -> {
-                return false;
-            }
-            default -> {
-                return null;
-            }
-        }
     }
 }
