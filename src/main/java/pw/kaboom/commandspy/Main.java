@@ -1,6 +1,7 @@
 package pw.kaboom.commandspy;
 
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
@@ -58,27 +59,37 @@ public final class Main extends JavaPlugin implements Listener {
     private void registerCommands(final Commands registrar) {
         final LiteralCommandNode<CommandSourceStack> commandSpyCommand =
             literal("commandspy")
-                .requires(Commands.restricted(ctx -> ctx.getSender()
-                    .hasPermission("commandspy.command")))
-                .then(argument("state", new StateArgumentType())
-                    .executes(ctx -> updateState(ctx.getSource().getSender(),
-                        null, getState(ctx, "state"))))
-                .then(argument("target", new PlayerOrUUIDArgumentType())
-                    .then(argument("state", new StateArgumentType())
-                        .executes(ctx -> updateState(ctx.getSource().getSender(),
-                            getPlayer(ctx, "target"), getState(ctx, "state"))))
-                    .executes(ctx -> updateState(ctx.getSource().getSender(),
-                        getPlayer(ctx, "target"), null)))
-                .executes(ctx -> updateState(ctx.getSource().getSender(),
-                    null, null))
+                .requires(
+                    Commands.restricted(
+                        ctx -> ctx.getSender().hasPermission("commandspy.command")
+                    )
+                )
+                .then(
+                    argument("state", new StateArgumentType())
+                        .executes(ctx -> updateState(ctx, null, getState(ctx, "state")))
+                )
+                .then(
+                    argument("target", new PlayerOrUUIDArgumentType())
+                        .then(
+                            argument("state", new StateArgumentType())
+                                .executes(
+                                    ctx -> updateState(
+                                        ctx, getPlayer(ctx, "target"), getState(ctx, "state")
+                                    )
+                                )
+                        )
+                        .executes(ctx -> updateState(ctx, getPlayer(ctx, "target"), null))
+                )
+                .executes(ctx -> updateState(ctx, null, null))
                 .build();
 
         registrar.register(commandSpyCommand,
             "Allows you to spy on players' commands", List.of("c", "cs", "cspy"));
     }
 
-    private int updateState(final @NotNull CommandSender source,
+    private int updateState(final @NotNull CommandContext<CommandSourceStack> ctx,
                             Player target, Boolean state) throws CommandSyntaxException {
+        final CommandSender source = ctx.getSource().getSender();
         if (target == null) {
             if (!(source instanceof final Player player)) throw ERROR_NOT_PLAYER.create();
             target = player;
