@@ -29,7 +29,7 @@ jobs:
           archive: false
 
   release:
-    if: github.repository == 'kaboomserver/extras' && github.ref == 'refs/heads/master'
+    if: github.repository == 'kaboomserver/commandspy' && github.ref == 'refs/heads/master'
     needs: build
     runs-on: ubuntu-slim
     timeout-minutes: 15
